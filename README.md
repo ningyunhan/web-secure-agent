@@ -83,19 +83,32 @@ web-secure-agent/
 
 ## 四、环境准备与依赖安装
 
-### 4.1 安装 Python 3.10+
+### 4.1 安装 Docker（推荐，一键启动）
+
+```bash
+# macOS
+brew install --cask docker
+# 安装完成后打开「启动台」中的 Docker 应用，等顶部鲸鱼图标就绪
+
+# 验证安装
+docker --version
+docker-compose --version
+```
+
+### 4.2 本地开发环境（可选，不使用 Docker 时）
+
+#### 安装 Python 3.9+
 
 ```bash
 # macOS（通过 Homebrew）
 brew install python@3.12
-python3 --version  # 应输出 Python 3.12.x
+python3 --version
 
 # Windows
-# 从 https://www.python.org/downloads/ 下载，安装时勾选 "Add Python to PATH"
 winget install Python.Python.3.12
 ```
 
-### 4.2 安装 Node.js 22+
+#### 安装 Node.js 22+
 
 ```bash
 # macOS（通过 Homebrew）
@@ -108,7 +121,7 @@ source ~/.zshrc
 nvm install 22 && nvm use 22 && nvm alias default 22
 ```
 
-### 4.3 安装 Ollama（可选，用于本地大模型）
+#### 安装 Ollama（可选，用于本地大模型）
 
 如果不想使用 OpenAI/DeepSeek API，可以安装 Ollama 在本地运行大模型：
 
@@ -118,7 +131,7 @@ ollama serve                 # 启动服务
 ollama pull qwen2.5:7b       # 下载模型（约 4.7GB）
 ```
 
-### 4.4 后端项目初始化
+#### 后端项目初始化
 
 ```bash
 cd backend
@@ -145,7 +158,7 @@ numpy==1.26.0
 python-multipart==0.0.9
 ```
 
-### 4.5 前端项目初始化
+#### 前端项目初始化
 
 ```bash
 cd frontend
@@ -165,7 +178,7 @@ npm run dev   # 看到 "Local: http://localhost:5173/" 即成功
 | vite | 前端构建工具 |
 | typescript | TypeScript 语言支持 |
 
-### 4.6 环境变量配置
+#### 环境变量配置
 
 在后端目录创建 `.env` 文件（参考 `.env.example`）：
 
@@ -355,11 +368,34 @@ Swagger 文档：`http://localhost:8000/docs`
 
 每条包含 banner 文本、标注的 service 和 version、category 分类。
 
-## 六、本地启动指南
+## 六、启动指南
 
-### 6.1 快速启动
+### 6.1 Docker 启动（推荐）
 
-需要两个终端窗口分别启动后端和前端：
+在项目根目录创建 `.env` 文件，填入 DeepSeek API Key：
+
+```bash
+echo 'OPENAI_API_KEY=sk-你的deepseek-key' > .env
+```
+
+一键启动前后端：
+
+```bash
+docker-compose up --build
+```
+
+启动后浏览器打开 `http://localhost` 即可使用（80 端口，无需加端口号）。后端 API 文档在 `http://localhost:8000/docs`。
+
+停止服务：
+
+```bash
+docker-compose down          # 停止并移除容器（数据保留在 Docker 卷中）
+docker-compose down -v       # 停止并清除所有数据（慎用）
+```
+
+### 6.2 本地开发启动
+
+不使用 Docker 时，需要两个终端窗口分别启动后端和前端：
 
 ```bash
 # 终端1：启动后端
@@ -377,20 +413,22 @@ npm run dev
 
 启动后浏览器打开 `http://localhost:5173` 即可使用。后端 API 文档在 `http://localhost:8000/docs`。
 
-### 6.2 使用本地模型（无需 API Key）
+### 6.3 使用本地模型（无需 API Key）
 
 ```bash
 brew install ollama
 ollama serve
 ollama pull qwen2.5:7b
 
-# 修改 backend/.env
+# 本地开发：修改 backend/.env
 # LLM_PROVIDER=ollama
 # OLLAMA_BASE_URL=http://localhost:11434/v1
 # LLM_MODEL=qwen2.5:7b
+
+# Docker：修改 docker-compose.yml 中 backend 的 environment 配置
 ```
 
-### 6.3 首次使用说明
+### 6.4 首次使用说明
 
 系统首次启动时会自动从 `knowledge_base.json` 加载预置知识到 ChromaDB。验证步骤：
 
