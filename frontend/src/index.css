@@ -1,0 +1,113 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0d1117;
+  color: #e6edf3;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3142;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a4252;
+}
+
+/* 页面切换动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 侧边栏渐变 */
+.sidebar-gradient {
+  background: linear-gradient(180deg, #0d1117 0%, #0a0e16 100%) !important;
+}
+
+/* 侧边栏 logo 区域 */
+.sidebar-logo {
+  background: linear-gradient(135deg, #00d4ff20 0%, #0066ff20 100%);
+  border-bottom: 1px solid #1a2332;
+}
+
+/* 状态指示灯脉冲动画 */
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 4px #52c41a; }
+  50% { box-shadow: 0 0 12px #52c41a; }
+}
+
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 4px #ff4d4f; }
+  50% { box-shadow: 0 0 12px #ff4d4f; }
+}
+
+.status-dot-online {
+  animation: pulse-green 2s infinite;
+}
+
+.status-dot-offline {
+  animation: pulse-red 2s infinite;
+}
+
+/* 卡片悬停效果 */
+.hover-card {
+  transition: all 0.3s ease;
+}
+.hover-card:hover {
+  border-color: #00d4ff40 !important;
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.1);
+}
+
+/* JSON 代码高亮 */
+.json-highlight {
+  background: #0d1117;
+  border: 1px solid #2a3142;
+  border-radius: 6px;
+  padding: 16px;
+  font-family: 'SF Mono', Monaco, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.json-key { color: #79c0ff; }
+.json-string { color: #a5d6ff; }
+.json-number { color: #f0883e; }
+.json-boolean { color: #d2a8ff; }
+.json-null { color: #8b949e; }
+
+/* 表格内状态指示灯 */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-dot.status-online {
+  background: #52c41a;
+  box-shadow: 0 0 6px #52c41a;
+  animation: pulse-green 2s infinite;
+}
+.status-dot.status-offline {
+  background: #6e7681;
+}

@@ -1,0 +1,122 @@
+[
+  {
+    "banner": "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.1",
+    "service": "openssh",
+    "version": "8.9p1",
+    "category": "standard"
+  },
+  {
+    "banner": "nginx/1.24.0",
+    "service": "nginx",
+    "version": "1.24.0",
+    "category": "standard"
+  },
+  {
+    "banner": "Server: Apache/2.4.58 (Unix) OpenSSL/1.1.1w",
+    "service": "apache",
+    "version": "2.4.58",
+    "category": "standard"
+  },
+  {
+    "banner": "redis_version:7.2.3\nredis_mode:standalone\nos:Linux",
+    "service": "redis",
+    "version": "7.2.3",
+    "category": "standard"
+  },
+  {
+    "banner": "SSH-2.0-OpenSSH_7.4",
+    "service": "openssh",
+    "version": "7.4",
+    "category": "standard"
+  },
+  {
+    "banner": "nginx/1.18.0 (Ubuntu)",
+    "service": "nginx",
+    "version": "1.18.0",
+    "category": "standard"
+  },
+  {
+    "banner": "Server: Apache/2.4.41 (Ubuntu)",
+    "service": "apache",
+    "version": "2.4.41",
+    "category": "standard"
+  },
+  {
+    "banner": "redis_version:6.2.6\nos:Darwin",
+    "service": "redis",
+    "version": "6.2.6",
+    "category": "standard"
+  },
+  {
+    "banner": "PostgreSQL 15.3 on x86_64-pc-linux-gnu",
+    "service": "postgresql",
+    "version": "15.3",
+    "category": "standard"
+  },
+  {
+    "banner": "SSH-2.0-OpenSSH_9.0p1 Debian-1+deb12u1",
+    "service": "openssh",
+    "version": "9.0p1",
+    "category": "standard"
+  },
+  {
+    "banner": "mysql 8.0.35-0ubuntu0.22.04.1",
+    "service": "mysql",
+    "version": "8.0.35",
+    "category": "standard"
+  },
+  {
+    "banner": "nginx/1.26.0",
+    "service": "nginx",
+    "version": "1.26.0",
+    "category": "standard"
+  },
+  {
+    "banner": "MyAwesomeGateway/2.0 (built on nginx)",
+    "service": "nginx",
+    "version": null,
+    "category": "disguised"
+  },
+  {
+    "banner": "Welcome to Internal Cloud Service - SSH proxy ready",
+    "service": "openssh",
+    "version": null,
+    "category": "disguised"
+  },
+  {
+    "banner": "HTTP/1.1 200 OK\nServer: \nContent-Type: text/html",
+    "service": "nginx",
+    "version": null,
+    "category": "disguised"
+  },
+  {
+    "banner": "RDS-Proxy-Server/1.0 (Redis Compatible)",
+    "service": "redis",
+    "version": null,
+    "category": "disguised"
+  },
+  {
+    "banner": "SecureWebGateway - Powered by Apache",
+    "service": "apache",
+    "version": null,
+    "category": "disguised"
+  },
+  {
+    "banner": "MT-DataSync-Server/1.0 (MySQL Protocol Compatible)",
+    "service": "mysql",
+    "version": null,
+    "category": "internal"
+  },
+  {
+    "banner": "MT-Internal-Auth-Service/2.3.1",
+    "service": "openssh",
+    "version": null,
+    "category": "internal"
+  },
+  {
+    "banner": "CorpNet-LoadBalancer/3.0 (nginx-based)",
+    "service": "nginx",
+    "version": null,
+    "category": "internal"
+  }
+]

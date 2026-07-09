@@ -1,0 +1,170 @@
+{
+  "entries": [
+    {
+      "id": "kp-001",
+      "type": "fingerprint",
+      "title": "Nginx Banner 特征",
+      "content": "Nginx HTTP服务器典型Banner格式为 'nginx/version'，如 nginx/1.24.0。伪装情况下可能显示为 'Server: nginx' 但隐藏版本号，或修改为其他服务名。部分自研网关基于Nginx开发，Banner中可能包含自定义标识但底层仍为Nginx。",
+      "source": "manual",
+      "confidence": 0.9,
+      "status": "active",
+      "tags": [
+        "web",
+        "http",
+        "nginx"
+      ]
+    },
+    {
+      "id": "kp-002",
+      "type": "fingerprint",
+      "title": "OpenSSH Banner 特征",
+      "content": "SSH服务Banner标准格式为 'SSH-protoversion-softwareversion'，如 'SSH-2.0-OpenSSH_8.9p1'。伪装情况可能修改软件版本字符串，但协议版本通常不变。Banner中可能包含操作系统信息，如 Ubuntu-3ubuntu0.1。",
+      "source": "manual",
+      "confidence": 0.9,
+      "status": "active",
+      "tags": [
+        "ssh",
+        "remote-access"
+      ]
+    },
+    {
+      "id": "kp-003",
+      "type": "fingerprint",
+      "title": "Redis 未授权访问特征",
+      "content": "Redis服务在未设置认证时，连接会返回 '-ERR wrong number of arguments' 或 '+PONG'。部分版本Banner包含版本号 'redis_version:x.y.z'。非标格式可能省略版本号或使用自定义提示。Redis默认端口6379。",
+      "source": "manual",
+      "confidence": 0.85,
+      "status": "active",
+      "tags": [
+        "redis",
+        "database",
+        "unauthorized"
+      ]
+    },
+    {
+      "id": "kp-004",
+      "type": "fingerprint",
+      "title": "Apache HTTP Server Banner 特征",
+      "content": "Apache服务器Banner典型格式为 'Apache/version'，可能附带操作系统和模块信息，如 'Apache/2.4.58 (Unix) OpenSSL/1.1.1w'。伪装时可能移除版本号或修改Server头。",
+      "source": "manual",
+      "confidence": 0.9,
+      "status": "active",
+      "tags": [
+        "web",
+        "http",
+        "apache"
+      ]
+    },
+    {
+      "id": "kp-005",
+      "type": "fingerprint",
+      "title": "MySQL Banner 特征",
+      "content": "MySQL服务在建立连接时会发送版本信息，Banner格式通常包含版本号如 'mysql' 后跟版本字符串。非标格式可能仅显示部分版本信息。MySQL默认端口3306。",
+      "source": "manual",
+      "confidence": 0.85,
+      "status": "active",
+      "tags": [
+        "mysql",
+        "database"
+      ]
+    },
+    {
+      "id": "kv-001",
+      "type": "vulnerability",
+      "title": "Log4j CVE-2021-44228 (Log4Shell)",
+      "content": "Log4Shell漏洞影响Log4j 2.0-beta9到2.14.1版本。受影响服务Banner中可能包含Java应用标识。利用JNDI注入可实现远程代码执行（RCE）。修复方案：升级到2.17.1+。CVE评分10.0（最高危）。",
+      "source": "cve-db",
+      "confidence": 0.95,
+      "status": "active",
+      "tags": [
+        "log4j",
+        "rce",
+        "critical"
+      ]
+    },
+    {
+      "id": "kv-002",
+      "type": "vulnerability",
+      "title": "OpenSSL Heartbleed CVE-2014-0160",
+      "content": "影响OpenSSL 1.0.1到1.0.1f版本。可通过TLS心跳扩展读取服务器内存泄露信息，可能泄露私钥和用户数据。受影响服务的Banner中OpenSSL版本在1.0.1至1.0.1f之间。修复方案：升级到1.0.1g+。",
+      "source": "cve-db",
+      "confidence": 0.9,
+      "status": "active",
+      "tags": [
+        "openssl",
+        "memory-leak",
+        "high"
+      ]
+    },
+    {
+      "id": "kv-003",
+      "type": "vulnerability",
+      "title": "Redis 未授权访问 CVE-2015-4335",
+      "content": "Redis未配置认证且绑定0.0.0.0时，攻击者可直接连接并写入恶意数据。影响Redis所有未配置认证的版本。修复方案：配置requirepass、绑定127.0.0.1、禁用危险命令。",
+      "source": "cve-db",
+      "confidence": 0.9,
+      "status": "active",
+      "tags": [
+        "redis",
+        "unauthorized",
+        "high"
+      ]
+    },
+    {
+      "id": "ks-001",
+      "type": "sop",
+      "title": "SSH服务加固SOP",
+      "content": "1.禁用root远程登录(PermitRootLogin no) 2.限制密码认证，优先使用密钥认证(PasswordAuthentication no) 3.修改默认端口 4.限制登录IP范围 5.设置登录失败锁定 6.定期更新OpenSSH版本 7.设置MaxAuthTries限制重试次数",
+      "source": "manual",
+      "confidence": 0.85,
+      "status": "active",
+      "tags": [
+        "ssh",
+        "hardening",
+        "baseline"
+      ]
+    },
+    {
+      "id": "ks-002",
+      "type": "sop",
+      "title": "Web服务器加固SOP",
+      "content": "1.隐藏服务器版本信息(ServerTokens Prod) 2.配置HTTPS并使用TLS 1.2+ 3.设置安全HTTP头(X-Frame-Options, X-Content-Type-Options) 4.限制请求体大小 5.配置WAF规则 6.定期更新服务器软件 7.启用访问日志并监控异常请求",
+      "source": "manual",
+      "confidence": 0.85,
+      "status": "active",
+      "tags": [
+        "web",
+        "nginx",
+        "apache",
+        "hardening"
+      ]
+    },
+    {
+      "id": "ks-003",
+      "type": "sop",
+      "title": "Redis数据库加固SOP",
+      "content": "1.配置requirepass认证密码 2.绑定127.0.0.1而非0.0.0.0 3.禁用危险命令(rename-command FLUSHALL空字符串) 4.启用ACL用户权限管理 5.配置最大内存限制 6.定期备份数据 7.更新Redis到最新稳定版",
+      "source": "manual",
+      "confidence": 0.85,
+      "status": "active",
+      "tags": [
+        "redis",
+        "database",
+        "hardening",
+        "baseline"
+      ]
+    },
+    {
+      "id": "6afade86-8690-45cd-a26d-d06ce1987108",
+      "type": "vulnerability",
+      "title": "测试漏洞",
+      "content": "这是一个测试漏洞条目",
+      "source": "manual",
+      "confidence": 0.8,
+      "status": "active",
+      "tags": [
+        "test"
+      ]
+    }
+  ]
+}
