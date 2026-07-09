@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: '/api',
   timeout: 60000,
 });
 
@@ -23,6 +23,10 @@ export const addKnowledge = (data: {
 
 export const deleteKnowledge = (id: string) =>
   api.delete(`/knowledge/${id}`);
+
+export const updateKnowledge = (id: string, data: {
+  type: string; title: string; content: string; tags: string[]
+}) => api.put(`/knowledge/${id}`, data);
 
 export const updateKnowledgeStatus = (id: string, status: string) =>
   api.patch(`/knowledge/${id}/status`, { status });

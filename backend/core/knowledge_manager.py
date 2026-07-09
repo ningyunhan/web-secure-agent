@@ -75,6 +75,27 @@ class KnowledgeManager:
         logger.warning("状态变更失败：未找到 | id=%s", knowledge_id)
         return False
 
+    def update(
+        self, knowledge_id: str, type: str, title: str,
+        content: str, tags: List[str] = None
+    ) -> Optional[dict]:
+        """更新知识条目（热更新，立即生效）"""
+        for e in self.store["entries"]:
+            if e["id"] == knowledge_id:
+                e["type"] = type
+                e["title"] = title
+                e["content"] = content
+                e["tags"] = tags or []
+                self._save_store()
+                # 先删后加，更新 ChromaDB 中的向量和 metadata
+                self.rag.delete_knowledge(knowledge_id)
+                entry = KnowledgeEntry(**e)
+                self.rag.add_knowledge(entry)
+                logger.info("知识更新 | id=%s | type=%s | title=%s", knowledge_id, type, title)
+                return e
+        logger.warning("知识更新失败：未找到 | id=%s", knowledge_id)
+        return None
+
     def list_all(self, type_filter: Optional[str] = None) -> List[dict]:
         """列出所有知识条目，支持按类型筛选"""
         entries = self.store["entries"]

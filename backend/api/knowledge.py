@@ -45,6 +45,29 @@ async def add_knowledge(req: KnowledgeCreate):
     return {"id": entry.id, "message": "添加成功，已立即生效"}
 
 
+class KnowledgeUpdate(BaseModel):
+    type: str
+    title: str
+    content: str
+    tags: List[str] = []
+
+
+@router.put("/knowledge/{knowledge_id}")
+async def update_knowledge(knowledge_id: str, req: KnowledgeUpdate):
+    """更新知识条目（热更新，立即生效）"""
+    logger.info("API PUT /knowledge/%s | type=%s | title=%s", knowledge_id, req.type, req.title)
+    entry = _km.update(
+        knowledge_id=knowledge_id,
+        type=req.type,
+        title=req.title,
+        content=req.content,
+        tags=req.tags
+    )
+    if entry is None:
+        raise HTTPException(status_code=404, detail="知识条目不存在")
+    return {"message": "更新成功，已立即生效"}
+
+
 @router.delete("/knowledge/{knowledge_id}")
 async def delete_knowledge(knowledge_id: str):
     """删除知识条目（硬删除）"""

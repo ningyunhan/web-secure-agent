@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Select, Tag, message, Popconfirm, Space, Card, Row, Col, Statistic, Progress, Tooltip } from 'antd';
+import { Table, Button, Modal, Form, Input, Select, Tag, message, Popconfirm, Space, Card, Row, Col, Statistic, Progress, Tooltip, Descriptions } from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
   BugOutlined,
   SafetyCertificateOutlined,
   DatabaseOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import { listKnowledge, addKnowledge, deleteKnowledge, updateKnowledgeStatus } from '../api';
+import { listKnowledge, addKnowledge, deleteKnowledge, updateKnowledgeStatus, updateKnowledge } from '../api';
 
 interface KnowledgeItem {
   id: string;
@@ -45,8 +47,13 @@ const typeMeta: Record<string, { label: string; color: string; icon: React.React
 export default function KnowledgeManage({ backendOnline }: { backendOnline?: boolean }) {
   const [data, setData] = useState<KnowledgeItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [form] = Form.useForm();
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState<KnowledgeItem | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
+  const [addForm] = Form.useForm();
+  const [editForm] = Form.useForm();
   const [filter, setFilter] = useState<string | undefined>(undefined);
 
   const loadData = async () => {
@@ -65,14 +72,14 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
   }, [filter]);
 
   const handleAdd = async () => {
-    const values = await form.validateFields();
+    const values = await addForm.validateFields();
     const tags = values.tags
       ? values.tags.split(',').map((t: string) => t.trim()).filter(Boolean)
       : [];
     await addKnowledge({ ...values, tags });
     message.success('添加成功，已立即生效');
-    setModalOpen(false);
-    form.resetFields();
+    setAddModalOpen(false);
+    addForm.resetFields();
     loadData();
   };
 
@@ -87,6 +94,39 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
     await updateKnowledgeStatus(record.id, newStatus);
     message.success(newStatus === 'active' ? '已启用' : '已禁用');
     loadData();
+  };
+
+  const openEdit = (record: KnowledgeItem) => {
+    setCurrentItem(record);
+    editForm.setFieldsValue({
+      type: record.type,
+      title: record.title,
+      content: record.content,
+      tags: record.tags?.join(', '),
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleEdit = async () => {
+    const values = await editForm.validateFields();
+    const tags = values.tags
+      ? values.tags.split(',').map((t: string) => t.trim()).filter(Boolean)
+      : [];
+    setEditSaving(true);
+    try {
+      await updateKnowledge(currentItem!.id, { ...values, tags });
+      message.success('更新成功，已立即生效');
+      setEditModalOpen(false);
+      loadData();
+    } catch {
+      message.error('更新失败');
+    }
+    setEditSaving(false);
+  };
+
+  const openView = (record: KnowledgeItem) => {
+    setCurrentItem(record);
+    setViewModalOpen(true);
   };
 
   // 统计数据
@@ -151,9 +191,25 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
     },
     {
       title: '操作',
-      width: 160,
+      width: 200,
       render: (_: any, r: KnowledgeItem) => (
         <Space>
+          <Button
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => openView(r)}
+          >
+            查看
+          </Button>
+          <Button
+            size="small"
+            type="primary"
+            ghost
+            icon={<EditOutlined />}
+            onClick={() => openEdit(r)}
+          >
+            编辑
+          </Button>
           <Button
             size="small"
             onClick={() => handleToggleStatus(r)}
@@ -235,7 +291,7 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
               { value: 'sop', label: '应急SOP' },
             ]}
           />
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModalOpen(true)}>
             添加知识
           </Button>
         </Space>
@@ -250,14 +306,15 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
         />
       </Card>
 
+      {/* 添加知识弹窗 */}
       <Modal
         title="添加知识条目"
-        open={modalOpen}
+        open={addModalOpen}
         onOk={handleAdd}
-        onCancel={() => setModalOpen(false)}
+        onCancel={() => setAddModalOpen(false)}
         width={600}
       >
-        <Form form={form} layout="vertical">
+        <Form form={addForm} layout="vertical">
           <Form.Item name="type" label="类型" rules={[{ required: true }]}>
             <Select
               options={[
@@ -272,6 +329,100 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
           </Form.Item>
           <Form.Item name="content" label="内容" rules={[{ required: true }]}>
             <Input.TextArea rows={4} placeholder="详细描述知识内容" />
+          </Form.Item>
+          <Form.Item name="tags" label="标签（逗号分隔）">
+            <Input placeholder="如：web, http, nginx" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 查看知识弹窗 */}
+      <Modal
+        title="知识详情"
+        open={viewModalOpen}
+        onCancel={() => setViewModalOpen(false)}
+        footer={[
+          <Button key="close" onClick={() => setViewModalOpen(false)}>关闭</Button>,
+          <Button
+            key="edit"
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setViewModalOpen(false);
+              if (currentItem) openEdit(currentItem);
+            }}
+          >
+            编辑
+          </Button>,
+        ]}
+        width={640}
+      >
+        {currentItem && (
+          <Descriptions column={1} bordered size="small" style={{ background: '#0d1117' }}>
+            <Descriptions.Item label="类型">
+              {(() => {
+                const meta = typeMeta[currentItem.type];
+                return meta ? (
+                  <Tag style={{ color: meta.color, borderColor: meta.color, background: 'transparent' }}>
+                    {meta.label}
+                  </Tag>
+                ) : <Tag>{currentItem.type}</Tag>;
+              })()}
+            </Descriptions.Item>
+            <Descriptions.Item label="标题">{currentItem.title}</Descriptions.Item>
+            <Descriptions.Item label="内容">
+              <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: 300, overflowY: 'auto' }}>
+                {currentItem.content}
+              </div>
+            </Descriptions.Item>
+            <Descriptions.Item label="来源">{currentItem.source}</Descriptions.Item>
+            <Descriptions.Item label="置信度">
+              <Progress
+                percent={Math.round(currentItem.confidence * 100)}
+                size="small"
+                style={{ width: 200 }}
+                strokeColor={currentItem.confidence >= 0.8 ? '#52c41a' : currentItem.confidence >= 0.5 ? '#faad14' : '#ff4d4f'}
+              />
+            </Descriptions.Item>
+            <Descriptions.Item label="状态">
+              {currentItem.status === 'active' ? '已启用' : '已禁用'}
+            </Descriptions.Item>
+            <Descriptions.Item label="标签">
+              {currentItem.tags?.length > 0
+                ? currentItem.tags.map((t) => <Tag key={t} style={{ background: '#21262d', borderColor: '#30363d' }}>{t}</Tag>)
+                : '无'}
+            </Descriptions.Item>
+            <Descriptions.Item label="ID">
+              <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#8b949e' }}>{currentItem.id}</span>
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Modal>
+
+      {/* 编辑知识弹窗 */}
+      <Modal
+        title="编辑知识条目"
+        open={editModalOpen}
+        onOk={handleEdit}
+        onCancel={() => setEditModalOpen(false)}
+        confirmLoading={editSaving}
+        width={600}
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item name="type" label="类型" rules={[{ required: true }]}>
+            <Select
+              options={[
+                { value: 'fingerprint', label: '指纹特征' },
+                { value: 'vulnerability', label: '漏洞情报' },
+                { value: 'sop', label: '应急SOP' },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item name="title" label="标题" rules={[{ required: true }]}>
+            <Input placeholder="如：Nginx Banner 特征" />
+          </Form.Item>
+          <Form.Item name="content" label="内容" rules={[{ required: true }]}>
+            <Input.TextArea rows={6} placeholder="详细描述知识内容" />
           </Form.Item>
           <Form.Item name="tags" label="标签（逗号分隔）">
             <Input placeholder="如：web, http, nginx" />

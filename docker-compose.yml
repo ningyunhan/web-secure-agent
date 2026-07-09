@@ -4,13 +4,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
-    environment:
-      - LLM_PROVIDER=openai
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENAI_BASE_URL=https://api.deepseek.com/v1
-      - LLM_MODEL=deepseek-chat
-      - CHROMA_DB_PATH=./data/chroma_db
-      - RAG_TOP_K=3
+    env_file:
+      - ./backend/.env
     volumes:
       - backend-data:/app/data
       - backend-logs:/app/logs
