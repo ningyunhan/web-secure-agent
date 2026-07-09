@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Table, Card, Spin, Alert, Row, Col, Statistic } from 'antd';
 import { PlayCircleOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { Column } from '@ant-design/charts';
@@ -24,6 +24,14 @@ export default function BatchTest({ backendOnline }: { backendOnline: boolean })
   const [data, setData] = useState<BatchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleRun = async () => {
     setError('');
@@ -127,19 +135,23 @@ export default function BatchTest({ backendOnline }: { backendOnline: boolean })
       )}
 
       <Card className="hover-card" style={{ marginBottom: 16 }}>
-        <Button
-          type="primary"
-          onClick={handleRun}
-          loading={loading}
-          size="large"
-          icon={<PlayCircleOutlined />}
-          disabled={!backendOnline}
-        >
-          运行批量测试
-        </Button>
-        <span style={{ marginLeft: 16, color: '#8b949e' }}>
-          将对 {data?.total || 20} 条测试数据分别执行 LLM 和正则两种方案
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <Button
+            type="primary"
+            onClick={handleRun}
+            loading={loading}
+            size="large"
+            icon={<PlayCircleOutlined />}
+            disabled={!backendOnline}
+          >
+            运行批量测试
+          </Button>
+          {!isMobile && (
+            <span style={{ color: '#8b949e' }}>
+              将对 {data?.total || 20} 条测试数据分别执行 LLM 和正则两种方案
+            </span>
+          )}
+        </div>
       </Card>
 
       {error && (
@@ -155,8 +167,8 @@ export default function BatchTest({ backendOnline }: { backendOnline: boolean })
       {data && (
         <>
           {/* 统计卡片 */}
-          <Row gutter={16} style={{ marginBottom: 16 }}>
-            <Col span={6}>
+          <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+            <Col xs={12} sm={12} md={6}>
               <Card className="hover-card" style={{ borderColor: '#00d4ff40' }}>
                 <Statistic
                   title="LLM 服务名准确率"
@@ -166,7 +178,7 @@ export default function BatchTest({ backendOnline }: { backendOnline: boolean })
                 />
               </Card>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={12} md={6}>
               <Card className="hover-card" style={{ borderColor: '#00d4ff40' }}>
                 <Statistic
                   title="LLM 版本号准确率"
@@ -176,7 +188,7 @@ export default function BatchTest({ backendOnline }: { backendOnline: boolean })
                 />
               </Card>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={12} md={6}>
               <Card className="hover-card" style={{ borderColor: '#ff4d4f40' }}>
                 <Statistic
                   title="正则 服务名准确率"
@@ -186,7 +198,7 @@ export default function BatchTest({ backendOnline }: { backendOnline: boolean })
                 />
               </Card>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={12} md={6}>
               <Card className="hover-card" style={{ borderColor: '#ff4d4f40' }}>
                 <Statistic
                   title="正则 版本号准确率"
@@ -211,6 +223,7 @@ export default function BatchTest({ backendOnline }: { backendOnline: boolean })
               rowKey={(_, i) => String(i)}
               pagination={false}
               size="small"
+              scroll={{ x: 600 }}
             />
           </Card>
         </>

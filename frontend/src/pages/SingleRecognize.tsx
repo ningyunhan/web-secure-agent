@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Input, Button, Card, Spin, Alert, Typography, Progress, Descriptions, Tag, Timeline, Empty } from 'antd';
+import { useState, useEffect } from 'react';
+import { Input, Button, Card, Spin, Alert, Typography, Progress, Descriptions, Tag, Timeline, Empty, Tooltip } from 'antd';
 import { ScanOutlined, BugOutlined, SafetyCertificateOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { recognize } from '../api';
 
@@ -19,6 +19,7 @@ interface FingerprintResult {
       type: string;
       title: string;
     };
+    similarity: number;
   }>;
 }
 
@@ -68,6 +69,14 @@ export default function SingleRecognize({ backendOnline }: { backendOnline: bool
   const [result, setResult] = useState<FingerprintResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 992);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const examples = [
     'SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.1',
@@ -120,7 +129,7 @@ export default function SingleRecognize({ backendOnline }: { backendOnline: bool
           onChange={(e) => setBanner(e.target.value)}
           style={{ fontFamily: 'monospace' }}
         />
-        <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <Button
             type="primary"
             onClick={handleRecognize}
@@ -131,18 +140,22 @@ export default function SingleRecognize({ backendOnline }: { backendOnline: bool
           >
             开始识别
           </Button>
-          <Text type="secondary" style={{ lineHeight: '40px', marginRight: 16 }}>
-            示例：
-          </Text>
-          {examples.map((ex, i) => (
-            <Tag
-              key={i}
-              style={{ cursor: 'pointer', fontFamily: 'monospace', lineHeight: '32px' }}
-              onClick={() => setBanner(ex)}
-            >
-              {ex.slice(0, 30)}{ex.length > 30 ? '...' : ''}
-            </Tag>
-          ))}
+          {!isMobile && (
+            <>
+              <Text type="secondary" style={{ lineHeight: '40px', marginRight: 16 }}>
+                示例：
+              </Text>
+              {examples.map((ex, i) => (
+                <Tag
+                  key={i}
+                  style={{ cursor: 'pointer', fontFamily: 'monospace', lineHeight: '32px' }}
+                  onClick={() => setBanner(ex)}
+                >
+                  {ex.slice(0, 30)}{ex.length > 30 ? '...' : ''}
+                </Tag>
+              ))}
+            </>
+          )}
         </div>
       </Card>
 
@@ -157,15 +170,15 @@ export default function SingleRecognize({ backendOnline }: { backendOnline: bool
       )}
 
       {result && (
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
           {/* 左侧：指纹结果 */}
-          <div style={{ flex: '1 1 60%', minWidth: 400 }}>
+          <div style={{ flex: isMobile ? '1 1 100%' : '1 1 60%', minWidth: isMobile ? '100%' : 300 }}>
             <Card
               className="hover-card"
               title="识别结果"
               style={{ marginBottom: 16 }}
             >
-              <Descriptions column={2} bordered size="small">
+              <Descriptions column={isMobile ? 1 : 2} bordered size="small">
                 <Descriptions.Item label="服务">
                   <Tag color={typeColors['fingerprint']} style={{ fontSize: 14, padding: '2px 12px' }}>
                     {result.service}
@@ -180,7 +193,7 @@ export default function SingleRecognize({ backendOnline }: { backendOnline: bool
                 <Descriptions.Item label="端口">
                   {result.port || <Text type="secondary">未知</Text>}
                 </Descriptions.Item>
-                <Descriptions.Item label="原始 Banner" span={2}>
+                <Descriptions.Item label="原始 Banner" span={isMobile ? 1 : 2}>
                   <Text code style={{ wordBreak: 'break-all', fontSize: 12 }}>
                     {result.raw_banner}
                   </Text>
@@ -211,7 +224,7 @@ export default function SingleRecognize({ backendOnline }: { backendOnline: bool
           </div>
 
           {/* 右侧：关联知识 */}
-          <div style={{ flex: '1 1 35%', minWidth: 300 }}>
+          <div style={{ flex: isMobile ? '1 1 100%' : '1 1 35%', minWidth: isMobile ? '100%' : 280 }}>
             <Card
               className="hover-card"
               title={
@@ -227,9 +240,24 @@ export default function SingleRecognize({ backendOnline }: { backendOnline: bool
                     dot: typeIcons[k.metadata?.type] || <DatabaseOutlined />,
                     children: (
                       <div key={i} style={{ paddingBottom: 8 }}>
-                        <Tag color={typeColors[k.metadata?.type]} style={{ marginBottom: 4 }}>
-                          {typeLabels[k.metadata?.type] || k.metadata?.type}
-                        </Tag>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, gap: 8, flexWrap: 'wrap' }}>
+                          <Tag color={typeColors[k.metadata?.type]}>
+                            {typeLabels[k.metadata?.type] || k.metadata?.type}
+                          </Tag>
+                          {k.similarity != null && (
+                            <Tooltip title={`向量距离 ${(((1 - k.similarity / 100) * 1.5)).toFixed(3)}`}>
+                              <Tag style={{
+                                background: k.similarity >= 70 ? '#16231a' : k.similarity >= 40 ? '#2b2110' : '#2b1010',
+                                color: k.similarity >= 70 ? '#52c41a' : k.similarity >= 40 ? '#faad14' : '#ff4d4f',
+                                borderColor: k.similarity >= 70 ? '#52c41a40' : k.similarity >= 40 ? '#faad1440' : '#ff4d4f40',
+                                fontWeight: 600,
+                                fontSize: 12,
+                              }}>
+                                相似度 {k.similarity}%
+                              </Tag>
+                            </Tooltip>
+                          )}
+                        </div>
                         <div style={{ fontWeight: 600, marginBottom: 4 }}>
                           {k.metadata?.title}
                         </div>

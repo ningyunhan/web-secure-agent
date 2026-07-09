@@ -111,3 +111,51 @@ body {
 .status-dot.status-offline {
   background: #6e7681;
 }
+
+/* 响应式：小屏适配 */
+@media (max-width: 768px) {
+  .json-highlight {
+    font-size: 12px;
+    padding: 12px;
+  }
+
+  .ant-card {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-statistic-title {
+    font-size: 12px !important;
+  }
+
+  .ant-statistic-content {
+    font-size: 20px !important;
+  }
+
+  .ant-table {
+    font-size: 12px !important;
+  }
+
+  .ant-table-cell {
+    padding: 6px 8px !important;
+  }
+
+  .ant-modal {
+    top: 20px !important;
+  }
+
+  .ant-modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .ant-statistic-content {
+    font-size: 16px !important;
+  }
+
+  .ant-btn-sm {
+    padding: 0 6px !important;
+    font-size: 12px !important;
+  }
+}

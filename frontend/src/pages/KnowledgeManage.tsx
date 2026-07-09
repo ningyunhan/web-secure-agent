@@ -191,38 +191,42 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
     },
     {
       title: '操作',
-      width: 200,
+      width: 160,
       render: (_: any, r: KnowledgeItem) => (
-        <Space>
-          <Button
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => openView(r)}
-          >
-            查看
-          </Button>
-          <Button
-            size="small"
-            type="primary"
-            ghost
-            icon={<EditOutlined />}
-            onClick={() => openEdit(r)}
-          >
-            编辑
-          </Button>
-          <Button
-            size="small"
-            onClick={() => handleToggleStatus(r)}
-            style={r.status === 'active' ? { color: '#faad14' } : { color: '#52c41a' }}
-          >
-            {r.status === 'active' ? '禁用' : '启用'}
-          </Button>
+        <Space size={4}>
+          <Tooltip title="查看详情">
+            <Button
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => openView(r)}
+            />
+          </Tooltip>
+          <Tooltip title="编辑">
+            <Button
+              size="small"
+              type="primary"
+              ghost
+              icon={<EditOutlined />}
+              onClick={() => openEdit(r)}
+            />
+          </Tooltip>
+          <Tooltip title={r.status === 'active' ? '禁用' : '启用'}>
+            <Button
+              size="small"
+              onClick={() => handleToggleStatus(r)}
+              style={r.status === 'active' ? { color: '#faad14' } : { color: '#52c41a' }}
+            >
+              {r.status === 'active' ? '禁用' : '启用'}
+            </Button>
+          </Tooltip>
           <Popconfirm
             title="确认删除？此操作不可恢复"
             icon={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
             onConfirm={() => handleDelete(r.id)}
           >
-            <Button danger size="small" icon={<DeleteOutlined />} />
+            <Tooltip title="删除">
+              <Button danger size="small" icon={<DeleteOutlined />} />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -232,8 +236,8 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
   return (
     <div>
       {/* 统计卡片 */}
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={6}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        <Col xs={12} sm={12} md={6}>
           <Card className="hover-card" style={{ borderColor: '#58a6ff40' }}>
             <Statistic
               title="知识总量"
@@ -246,7 +250,7 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
             </div>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={12} sm={12} md={6}>
           <Card className="hover-card" style={{ borderColor: typeMeta.fingerprint.borderColor }}>
             <Statistic
               title="指纹特征"
@@ -256,7 +260,7 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={12} sm={12} md={6}>
           <Card className="hover-card" style={{ borderColor: typeMeta.vulnerability.borderColor }}>
             <Statistic
               title="漏洞情报"
@@ -266,7 +270,7 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={12} sm={12} md={6}>
           <Card className="hover-card" style={{ borderColor: typeMeta.sop.borderColor }}>
             <Statistic
               title="应急SOP"
@@ -279,7 +283,7 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
       </Row>
 
       <Card className="hover-card">
-        <Space style={{ marginBottom: 16 }}>
+        <Space style={{ marginBottom: 16, flexWrap: 'wrap' }}>
           <Select
             placeholder="按类型筛选"
             allowClear
@@ -301,8 +305,9 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
           dataSource={data}
           rowKey="id"
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          pagination={{ pageSize: 10, size: 'small' }}
           size="small"
+          scroll={{ x: 1000 }}
         />
       </Card>
 
@@ -312,7 +317,8 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
         open={addModalOpen}
         onOk={handleAdd}
         onCancel={() => setAddModalOpen(false)}
-        width={600}
+        width="90%"
+        style={{ maxWidth: 600 }}
       >
         <Form form={addForm} layout="vertical">
           <Form.Item name="type" label="类型" rules={[{ required: true }]}>
@@ -355,7 +361,8 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
             编辑
           </Button>,
         ]}
-        width={640}
+        width="90%"
+        style={{ maxWidth: 640 }}
       >
         {currentItem && (
           <Descriptions column={1} bordered size="small" style={{ background: '#0d1117' }}>
@@ -406,7 +413,8 @@ export default function KnowledgeManage({ backendOnline }: { backendOnline?: boo
         onOk={handleEdit}
         onCancel={() => setEditModalOpen(false)}
         confirmLoading={editSaving}
-        width={600}
+        width="90%"
+        style={{ maxWidth: 600 }}
       >
         <Form form={editForm} layout="vertical">
           <Form.Item name="type" label="类型" rules={[{ required: true }]}>

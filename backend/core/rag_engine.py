@@ -54,23 +54,39 @@ class RAGEngine:
         logger.debug("向量库删除 | id=%s", knowledge_id)
 
     def search(self, query: str, top_k: int = None) -> List[dict]:
-        """语义检索相关知识"""
+        """语义检索相关知识，过滤相似度过低的结果"""
         if top_k is None:
             top_k = config.RAG_TOP_K
+        # 多取候选，再用阈值过滤
+        fetch_k = config.RAG_FETCH_K
         results = self.collection.query(
             query_embeddings=[self._embed(query)],
-            n_results=top_k,
+            n_results=fetch_k,
             where={"status": "active"}
         )
         matched = []
+        filtered = 0
         if results["documents"] and results["documents"][0]:
             for i, doc in enumerate(results["documents"][0]):
+                distance = results["distances"][0][i]
+                if distance > config.RAG_DISTANCE_THRESHOLD:
+                    filtered += 1
+                    continue
+                # distance 越小越相似，转成 0-100 的相似度评分
+                # distance=0 时 100 分，distance=阈值时约 0 分
+                similarity = max(0, round(100 * (1 - distance / config.RAG_DISTANCE_THRESHOLD)))
                 matched.append({
                     "content": doc,
                     "metadata": results["metadatas"][0][i],
-                    "distance": results["distances"][0][i]
+                    "distance": distance,
+                    "similarity": similarity
                 })
-        logger.debug("向量检索 | query='%s' | top_k=%d | 命中%d条", query, top_k, len(matched))
+                if len(matched) >= top_k:
+                    break
+        # 按相似度从高到低排序
+        matched.sort(key=lambda x: x["similarity"], reverse=True)
+        logger.info("向量检索 | query='%s' | 候选%d条 | 阈值%.2f过滤%d条 | 最终返回%d条",
+                   query, fetch_k, config.RAG_DISTANCE_THRESHOLD, filtered, len(matched))
         return matched
 
     def build_context(self, matched: List[dict]) -> str:

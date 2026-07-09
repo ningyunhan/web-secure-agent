@@ -1,4 +1,4 @@
-import { Layout, Menu, theme, Badge, Tooltip } from 'antd';
+import { Layout, Menu, theme, Tooltip } from 'antd';
 import { ScanOutlined, BarChartOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -11,10 +11,23 @@ const { Header, Sider, Content } = Layout;
 export default function App() {
   const [page, setPage] = useState('single');
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [backendOnline, setBackendOnline] = useState(false);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
+
+  // 响应式：监听窗口大小
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setCollapsed(true);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // 后端健康检查
   useEffect(() => {
@@ -43,9 +56,11 @@ export default function App() {
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
-        breakpoint="lg"
+        breakpoint="md"
+        collapsedWidth={isMobile ? 0 : 80}
         className="sidebar-gradient"
         width={220}
+        style={{ position: isMobile ? 'fixed' : 'relative', zIndex: 100, height: '100vh' }}
       >
         <div
           className="sidebar-logo"
@@ -83,15 +98,15 @@ export default function App() {
         <Header
           style={{
             background: '#161b22',
-            padding: '0 24px',
+            padding: isMobile ? '0 12px' : '0 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: '1px solid #2a3142',
           }}
         >
-          <span style={{ fontSize: 18, fontWeight: 500, color: '#e6edf3' }}>
-            网络安全资产指纹识别系统
+          <span style={{ fontSize: isMobile ? 14 : 18, fontWeight: 500, color: '#e6edf3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {isMobile ? '资产指纹识别' : '网络安全资产指纹识别系统'}
           </span>
           <Tooltip title={backendOnline ? '后端服务在线' : '后端服务离线'}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -112,17 +127,24 @@ export default function App() {
         </Header>
         <Content
           style={{
-            margin: 24,
-            padding: 24,
+            margin: isMobile ? 8 : 24,
+            padding: isMobile ? 12 : 24,
             background: '#161b22',
-            borderRadius: 12,
+            borderRadius: isMobile ? 8 : 12,
             border: '1px solid #2a3142',
+            overflowX: 'hidden',
           }}
         >
-          <div key={page} className="page-fade-in">
-            {page === 'single' && <SingleRecognize backendOnline={backendOnline} />}
-            {page === 'batch' && <BatchTest backendOnline={backendOnline} />}
-            {page === 'knowledge' && <KnowledgeManage backendOnline={backendOnline} />}
+          <div className="page-fade-in">
+            <div style={{ display: page === 'single' ? 'block' : 'none' }}>
+              <SingleRecognize backendOnline={backendOnline} />
+            </div>
+            <div style={{ display: page === 'batch' ? 'block' : 'none' }}>
+              <BatchTest backendOnline={backendOnline} />
+            </div>
+            <div style={{ display: page === 'knowledge' ? 'block' : 'none' }}>
+              <KnowledgeManage backendOnline={backendOnline} />
+            </div>
           </div>
         </Content>
       </Layout>
