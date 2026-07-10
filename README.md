@@ -76,12 +76,44 @@ web-secure-agent/
 │   │       ├── SingleRecognize.tsx # 单条识别（进度条+JSON高亮+知识时间线）
 │   │       ├── BatchTest.tsx       # 批量测试（柱状图+统计卡片+逐条对比）
 │   │       └── KnowledgeManage.tsx # 知识库管理（统计卡片+状态切换）
-│   └── tsconfig.json
+│   ├── tsconfig.json
+│   ├── Dockerfile                  # 前端 Docker 镜像（两阶段构建）
+│   ├── nginx.conf                  # nginx 配置（静态托管 + API 反向代理）
+│   └── .dockerignore               # Docker 构建排除文件
 │
+├── docker-compose.yml              # Docker 容器编排（一键启动）
+├── .env                            # Docker 环境变量（API Key）
+├── diagram-1783514854514.svg       # 架构图
+├── skills/                         # 可复用 Skill（从项目中抽象）
+│   ├── llm-structured-output/      # LLM 结构化输出修正管道
+│   │   ├── README.md               # 用途说明
+│   │   ├── SKILL.md                # 方法论（给 AI agent 读）
+│   │   ├── scripts/
+│   │   │   ├── fixer.py            # JSON 修正管道（四层兜底）
+│   │   │   └── analyze.py          # 闭环执行脚本
+│   │   └── references/
+│   │       └── examples.md         # 使用示例
+│   └── vector-kb/                  # 向量知识库管理 + 语义检索
+│       ├── README.md               # 用途说明
+│       ├── SKILL.md                # 方法论（给 AI agent 读）
+│       ├── scripts/
+│       │   └── kb.py               # VectorKB 类 + CLI 入口
+│       └── references/
+│           └── examples.md         # 使用示例
 └── README.md
 ```
 
-## 四、环境准备与依赖安装
+## 四、可复用 Skill
+
+项目中的核心能力已抽象为两个独立 Skill，放在 `skills/` 目录下，可被 AI agent 读取后在其他项目中复用。
+
+`skills/llm-structured-output/` — LLM 结构化输出修正管道。解决 LLM 输出 JSON 不规范（Markdown 包裹、废话前缀、缺字段）的问题，提供四层兜底修正（直接解析→去Markdown→提取大括号→Pydantic补全）。支持直接运行脚本拿结果或复制 fixer.py 到项目中集成使用。
+
+`skills/vector-kb/` — 向量知识库管理 + 语义检索。基于 ChromaDB + sentence-transformers，提供知识条目的增删改查、软删除/恢复、距离阈值过滤、相似度评分、热更新。支持 CLI 命令直接操作或作为 Python 模块集成使用。
+
+两个 Skill 可组合使用：第一个把非结构化文本提取成结构化数据，第二个用结构化数据检索关联知识。详见各 Skill 目录下的 README.md。
+
+## 五、环境准备与依赖安装
 
 ### 4.1 安装 Docker（推荐，一键启动）
 
